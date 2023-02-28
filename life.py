@@ -4,16 +4,19 @@ import pygame
 from pygame.locals import *
 
 # Константы
-BLACK = (0 , 0 , 0)
-WHITE = (255 , 255 , 255)
-HEIGHT = 500
-WIDTH = 500
+BLACK = (85, 72, 63)
+WHITE = (100, 153, 145)
+HEIGHT = 1000
+WIDTH = 1000
 FPS = 30
 NEIGHBOURS = ([-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1])
 RUN = True
+
+
 # Создаем окно
 root = pygame.display.set_mode((WIDTH , HEIGHT))
 clock = pygame.time.Clock()
+
 # ищем положение квадрата
 def find_square(position):
     pos_x = position[0] // 10 * 10
@@ -52,14 +55,19 @@ while RUN:
     for event in pygame.event.get():
         if event.type==	QUIT:
             sys.exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            position_x, position_y = find_square(event.pos)
-            if cells[position_x//20][position_y//20] == 1:
-                pygame.draw.rect(root, WHITE, (position_x+1, position_y+1, 19, 19))
-                cells[position_x//20][position_y//20] = 0
-            else:
-                pygame.draw.rect(root, BLACK, (position_x, position_y, 20, 20))
-                cells[position_x//20][position_y//20] = 1        
+
+        px, py = pygame.mouse.get_pos()
+        position_x, position_y = find_square((px,py))
+        if pygame.mouse.get_pressed() == (1,0,0):
+            pygame.draw.rect(root, BLACK, (position_x, position_y, 20, 20))
+            cells[position_x//20][position_y//20] = 1 
+        elif pygame.mouse.get_pressed() == (0,0,1):
+            pygame.draw.rect(root, WHITE, (position_x+1, position_y+1, 19, 19))
+            cells[position_x//20][position_y//20] = 0
+
+
+
+        # clear screen                
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_0:
                 for cell in range(0, len(cells)):
@@ -67,6 +75,7 @@ while RUN:
                         if cells[cell][one] == 1:
                             cells[cell][one]=0
                             pygame.draw.rect(root, WHITE, (cell*20 +1, one*20+1, 19, 19))
+        # cycle
         elif pygame.key.get_pressed()[K_SPACE]:
             for cell in range(0, len(cells)):
                         for one in range(0, len(cells[cell])):
@@ -80,7 +89,6 @@ while RUN:
                 for one in range(0, len(cells[cell])):
                     if cells[cell][one]:
                         if find_neighbors(cells, [cell,one]) not in (2,3):
-                            print(cell, one,': ', find_neighbors(cells, [cell,one]))
                             cells_new[cell][one] = 0
                             continue
                         cells_new[cell][one] = 1
