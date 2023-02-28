@@ -1,15 +1,19 @@
+import sys
+
 import pygame
 from pygame.locals import *
 
 # Константы
 BLACK = (0 , 0 , 0)
 WHITE = (255 , 255 , 255)
-HEIGHT = 1000
-WIDTH = 1000
+HEIGHT = 500
+WIDTH = 500
+FPS = 30
 NEIGHBOURS = ([-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1])
+RUN = True
 # Создаем окно
 root = pygame.display.set_mode((WIDTH , HEIGHT))
-
+clock = pygame.time.Clock()
 # ищем положение квадрата
 def find_square(position):
     pos_x = position[0] // 10 * 10
@@ -43,14 +47,11 @@ for j in range(0 , root.get_width() // 20):
 cells=[ [0 for j in range(root.get_height()//20)] for i in range(root.get_width()//20)]
 
 
-
-
-
-
-while 1:
+while RUN:
+    clock.tick(FPS)
     for event in pygame.event.get():
         if event.type==	QUIT:
-            quit()
+            sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             position_x, position_y = find_square(event.pos)
             if cells[position_x//20][position_y//20] == 1:
@@ -66,21 +67,26 @@ while 1:
                         if cells[cell][one] == 1:
                             cells[cell][one]=0
                             pygame.draw.rect(root, WHITE, (cell*20 +1, one*20+1, 19, 19))
-            elif event.key == pygame.K_SPACE:
-                for i in range(500):
-                    for cell in range(0, len(cells)):
+        elif pygame.key.get_pressed()[K_SPACE]:
+            for cell in range(0, len(cells)):
                         for one in range(0, len(cells[cell])):
-                            if cells[cell][one]:
-                                print(cell, one, 'neig: ', find_neighbors(cells, [cell,one]))
-                                if find_neighbors(cells, [cell,one]) not in (2,3):
-                                    print('got')
-                                    cells[cell][one] = 0
-                                    pygame.draw.rect(root, WHITE, (cell*20 +1, one*20+1, 19, 19))
-                                    continue
-                                cells[cell][one] = 1
-                            if find_neighbors(cells, [cell,one]) == 3:
-                                print('got')
-                                cells[cell][one] =1
+                            if cells[cell][one] == 1:
                                 pygame.draw.rect(root, BLACK, (cell*20 +1, one*20+1, 19, 19))
-                    pygame.display.update()
+                            else:
+                                pygame.draw.rect(root, WHITE, (cell*20 +1, one*20+1, 19, 19))
+            pygame.display.update()
+            cells_new = [[0 for j in range(len(cells[0]))] for i in range(len(cells))]
+            for cell in range(0, len(cells)):
+                for one in range(0, len(cells[cell])):
+                    if cells[cell][one]:
+                        if find_neighbors(cells, [cell,one]) not in (2,3):
+                            print(cell, one,': ', find_neighbors(cells, [cell,one]))
+                            cells_new[cell][one] = 0
+                            continue
+                        cells_new[cell][one] = 1
+                        continue
+                    elif cells[cell][one] == 0 and find_neighbors(cells, [cell,one]) == 3:
+                        cells_new[cell][one] =1 
+                        continue
+            cells = cells_new
     pygame.display.update()
